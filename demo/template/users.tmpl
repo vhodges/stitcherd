@@ -1,0 +1,8 @@
+<div style="margin-top:20px;">
+  {{range .json}}
+    <div style="padding:5px;margin-top:15px;background-color:#e8e8e8;">
+      <h3 style="margin:2px;"><a href="/users/{{.id}}">{{.name}}</a></h3>
+      <small>{{.email}}</small>
+    </div>
+  {{end}}
+</div>

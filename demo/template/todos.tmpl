@@ -1,0 +1,9 @@
+<div style="margin-top:20px;">
+  {{range .json}}
+    <input type="checkbox" disabled
+      {{ if .completed }}
+        checked
+     {{ end }}> &nbsp;
+    {{.title}}<br/>    
+  {{end}}
+</div>
