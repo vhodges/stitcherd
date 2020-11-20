@@ -108,7 +108,61 @@
             
             <div id="features" class="heading-text">Overview</div>
             <div id="homepage">
+<p>Static sites are great. They're fast to serve, there's less to to go wrong and are hostable 
+pretty much anywhere and any how you would like to.  But sometimes,  just sometimes there is
+some page or some part of every page that has dynamic or even personalized content on it. 
+Stitcherd is for those times.</p>
+<h2 id="features">Features</h2>
+<h3 id="current">Current</h3>
+<ul>
+<li>Multiple vhosts</li>
+<li>CSS Selector page assembly</li>
+<li>Static Content catch all (but... will allow proxy fallback soon)</li>
+<li>Simple cache controls per endpoint/route (more types coming soon - ie etag, last modified etc.)</li>
+<li>Go templates (with HTML and JSON Data retrieval) for endpoints</li>
+</ul>
+<h3 id="coming-soon">Coming Soon</h3>
+<ul>
+<li>Bot detection (&gt;800 known bots)</li>
+<li>Both General and (Bot == true) rate limiting (Site wide and per route)</li>
+<li>(Optional) Sessions </li>
+<li>Proxy for fallback (eg / to some CMS) and for routes (eg /blog/ proxied to Wordpress)</li>
+<li>Static content routes</li>
+<li>Site Authentication (OAUTH/SAML end point config, basic auth?  Builtin user/password (agencies?)). Authenticate routes?</li>
+<li>HMAC auth support for backend ends</li>
+<li>More control over endpoint request (ACTION/Verb, protocol, headers, cookies, form vars, etc )</li>
+</ul>
+<h1 id="building">Building</h1>
+<p>Requires Go &gt; 1.12 </p>
+<p>Clone the repo and then a simple </p>
+<pre><code>go build 
+</code></pre>
+<p>Docker image at some point</p>
+<h1 id="examples">Examples</h1>
+<p>There is a 'demo' folder that serves as an example/testbed</p>
+<pre><code>./stitcherd --host demo/site.hcl
+http://localhost:3000/
+</code></pre>
+<p>The home page at https://stitcherd.vhodges.dev/ also serves as an example.</p>
+<ul>
+<li>It pulls the index page content from the Github README.md (ie this file)</li>
+<li>It pulls a list of recent posts to the Announcment mailing list from sourcehut</li>
+<li>Source (and generated static site - via zola - are checked into source control under website)</li>
+</ul>
+<h1 id="prior-art-and-inspiration">Prior Art and Inspiration</h1>
+<ul>
+<li>Edge side includes (ESI) using Varnish https://varnish-cache.org/</li>
+<li>shtml files and virtual paths in nginx</li>
+<li>Greasemonkey: https://addons.mozilla.org/en-CA/firefox/addon/greasemonkey/ (Client side)</li>
+<li>Mousehole: https://github.com/whymirror/mousehole</li>
+<li>Jigsaw: https://www.w3.org/Jigsaw/Overview.html (I vaguely recall it could do some of this kind of thing - I could be wrong though)</li>
+<li>Netlify: most recently has the same idea with their Edge (Handlers) https://www.netlify.com/products/edge/edge-handlers/</li>
+<li>Soupault: Is the main inspiration for how stitcherd works. https://soupault.neocities.org/ </li>
+</ul>
+<h1 id="license">License</h1>
+<p>Apache 2.0</p>
 </div>
+
             
         </div>
 
