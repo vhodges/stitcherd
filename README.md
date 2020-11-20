@@ -32,7 +32,9 @@ Requires Go > 1.12
 
 Clone the repo and then a simple 
 
-``` go build ```
+``` 
+go build 
+```
 
 Docker image at some point
 
