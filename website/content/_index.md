@@ -52,7 +52,7 @@ There is a 'demo' folder that serves as an example/testbed
 http://localhost:3000/
 ```
 
-The home page at https://stitcherd.vhodges.dev/ also serves as an example.
+The home page at https://stitcherd.vhodges.dev/ will also serve as an example (soon).
 
 * It pulls the index page content from the Github README.md (ie this file)
 * It pulls a list of recent posts to the Announcment mailing list from sourcehut
