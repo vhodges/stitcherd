@@ -67,5 +67,11 @@ route "/{rest:.*html$}" {
 // The root of the site
 route "/" {
   source = "demo/html/index.html"
+
+  replace "#replaceme" {
+    with "" {
+      source = "string:<div id='replaceme'>This is the other other replacement string</div>"
+    }
+  }
 }
 
