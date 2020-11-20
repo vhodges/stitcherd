@@ -1,0 +1,49 @@
+{% extends "juice/templates/index.html" %}
+
+{% block hero %}
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+<section class="text-center">
+    <h1 class="heading-text" style="font-size: 40px;border:none;">
+        Dynamic content for <em>mostly</em> static sites
+    </h1>
+    <h3 class="title-text" style="border:none;">
+        Use CSS selectors to find and replace elements on pages with content
+        from other sources.
+    </h3>
+    <div>
+        <a class="github-button" href="https://github.com/vhodges/stitcherd" data-size="large" data-show-count="true"
+           aria-label="Star vhodges/stitcherd on GitHub">Star</a>
+        <a class="github-button" href="https://github.com/vhodges/stitcherd/fork" data-size="large"
+           data-show-count="true" aria-label="Fork vhodges/stitcherd on GitHub">Fork</a>
+    </div>
+</section>
+<img class="hero-image" style="width: 50%" src="{{ get_url(path="pixeltrue-icons-building-website.svg") }}">
+
+<div class="explore-more text"
+    onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})">
+    Explore More ⇩
+</div>
+<style>
+    .hero section {
+        padding: 0 5rem;
+    }
+    @media screen and (max-width: 768px) {
+        .hero section {
+            padding: 0 2rem;
+        }
+
+        .hero-image {
+            display: none
+        }
+    }
+</style>
+    </div>
+{% endblock hero %}
+
+{% block footer %}
+<footer>
+    <small class="subtext">
+        <a href="https://vhodges.dev">Vince Hodges</a> © 2020
+    </small>
+</footer>
+{% endblock footer %}

@@ -1,0 +1,9 @@
+<div class="content text">
+  <div class="heading-text">
+    {{ (.document.Find ".container .row:first-of-type div h3").Html }}
+  </div>
+
+  <pre>
+    {{ (.document.Find "pre.message-body").Html }}
+  </pre>
+</div>

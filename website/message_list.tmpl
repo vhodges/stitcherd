@@ -1,0 +1,15 @@
+<div id="news">
+  {{$elements := (.document.Find ".event-list").Children }}
+  {{$el := $elements.First}}
+  {{range $i, $_ := N $elements.Length }}
+    {{ $a := $el.Find "h4 a"}}
+    {{ $href := $a.AttrOr "href" "" }}
+    {{ $url := urlParse $href }}
+    {{ $label := $a.Text }}
+    
+    <h4><a href="{{ base $url.path }}">{{$label}}</a></h4>
+
+    {{ $el = $el.Next}}
+
+  {{end}}
+</div>
