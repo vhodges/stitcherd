@@ -4,6 +4,6 @@
   </div>
 
   <pre>
-    {{ (.document.Find "pre.message-body").Html }}
+    {{ unescape (.document.Find "pre.message-body").Html }}
   </pre>
 </div>
