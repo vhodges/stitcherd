@@ -147,6 +147,7 @@ func (endpoint *EndPoint) fetcher(contextdata map[string]interface{}) DocumentFe
 
 			funcs := sprig.GenericFuncMap()
 			funcs["N"] = iter.N
+			funcs["unescape"] = unescape
 
 			endpoint.parsedTemplate = template.Must(template.New(endpoint.Template).Funcs(template.FuncMap(funcs)).Parse(templateContents))
 		}
@@ -164,6 +165,10 @@ func (endpoint *EndPoint) fetcher(contextdata map[string]interface{}) DocumentFe
 
 	// Fallback to empty string
 	return fetcher
+}
+
+func unescape(s string) template.HTML {
+	return template.HTML(s)
 }
 
 // EndPointContextValue is passed via Context.WithValue() to the endpoint Getter Func
