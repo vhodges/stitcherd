@@ -13,6 +13,12 @@ route "/users" {
 
   cache = "/users"
   ttl = "30s"
+
+  maxrate = "10.0"
+  burst = "50"
+
+  botmaxrate = "2.0"
+  botburst = "5"
 }
 
 route "/users/{userid}" {
@@ -42,7 +48,6 @@ route "/users/{userid}" {
 
 // An example of matching /folder/ (ie pretty urls) and inject content in all of them.
 route "/{folderPath:.*\\/$}" {
-
   source = "demo/html/{{folderPath}}index.html"
 
   replace "#replaceme" {
@@ -54,7 +59,6 @@ route "/{folderPath:.*\\/$}" {
 
 // An example of injecting content into all file paths than end in html
 route "/{rest:.*html$}" {
-
   source = "demo/html/{{rest}}"
 
   replace "#replaceme" {

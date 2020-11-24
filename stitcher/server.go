@@ -26,6 +26,11 @@ func EndPointHandler(site *Host, endpoint EndPoint) func(http.ResponseWriter, *h
 
 		var fetchContext map[string]interface{} = make(map[string]interface{})
 
+		if endpoint.Throttling(r) {
+			http.Error(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
+			return
+		}
+
 		// TODO Better request tracing... (context.Context too?)
 		fetchContext["_requestId"] = nextRequestID()
 
@@ -122,6 +127,7 @@ func RunServer(listenAddress string, hostConfigFiles []string) {
 		for _, endPoint := range host.Routes {
 			// TODO Static hosting should just be a route/handler
 			//      ideally allowing merges and content injection too
+			endPoint.Init()
 			s.HandleFunc(endPoint.Route, EndPointHandler(host, endPoint))
 		}
 
