@@ -14,11 +14,11 @@ Stitcherd is for those times.
   * Static Content catch all (but... will allow proxy fallback soon)
   * Simple cache controls per endpoint/route (more types coming soon - ie etag, last modified etc.)
   * Go templates (with HTML and JSON Data retrieval) for endpoints
-
+  * Bot detection (>800 known bots)
+  * Both General and (Bot == true) rate limiting (per route)
+  
 ### Coming Soon
 
-  * Bot detection (>800 known bots)
-  * Both General and (Bot == true) rate limiting (Site wide and per route)
   * (Optional) Sessions 
   * Proxy for fallback (eg / to some CMS) and for routes (eg /blog/ proxied to Wordpress)
   * Static content routes
