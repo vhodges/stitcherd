@@ -40,8 +40,10 @@ func RunServer(listenAddress string, hostConfigFiles []string) {
 		// TODO Allow more flexible route definition/handling (ie Method, Protocol, etc)
 		for _, r := range host.Routes {
 			// TODO Static hosting should just be a route/handler
-			r.Init()
-			s.HandleFunc(r.Path, ContentHandler(host, r))
+			if r.Source != nil {
+				r.Init()
+				s.HandleFunc(r.Path, ContentHandler(host, r))
+			}
 		}
 
 		// If a document root was supplied, set up a default route for static content
