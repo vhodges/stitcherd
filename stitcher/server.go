@@ -13,7 +13,7 @@ import (
 // ContentHandler uses the Source to render content
 func ContentHandler(site *Host, route Route) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		route.Handler(site, w, r)
+		route.ContentHandler(site, w, r)
 	}
 }
 

@@ -70,8 +70,8 @@ func (route *Route) nextRequestID() string {
 	return fmt.Sprintf("%d", time.Now().UnixNano())
 }
 
-// Handler uses the Source to render content
-func (route *Route) Handler(site *Host, w http.ResponseWriter, r *http.Request) {
+// ContentHandler uses the Source to render content
+func (route *Route) ContentHandler(site *Host, w http.ResponseWriter, r *http.Request) {
 
 	start := time.Now()
 
