@@ -8,7 +8,6 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/mailgun/groupcache/v2"
 )
 
 // RouteHandler uses the Source to render content
@@ -34,44 +33,7 @@ func RunServer(listenAddress string, hostConfigFiles []string) {
 			continue
 		}
 
-		maxCache := host.MaxCache
-		if maxCache == 0 {
-			maxCache = 1 << 20
-		}
-
-		// Create a new group cache with a max cache size of 3MB
-		host.Cache = groupcache.NewGroup(host.Hostname, maxCache, groupcache.GetterFunc(
-
-			func(ctx context.Context, id string, dest groupcache.Sink) error {
-				v := ctx.Value(requestContextKey("request"))
-
-				r, ok := v.(EndPointContextValue)
-
-				if ok {
-
-					content, err := r.EndPoint.Render(r.Site, r.ContextData)
-
-					if err != nil {
-						log.Printf("Error: %v - '%+v'\n", err, r.EndPoint)
-						return err
-					}
-
-					ttl, err := time.ParseDuration(r.EndPoint.CacheTTL)
-					if err != nil {
-						log.Printf("Error parsing TTL duration: '%v' for key '%s' defaulting to a TTL of one minute\n", err, id)
-						ttl = time.Minute * 1
-					}
-
-					if err := dest.SetString(content, time.Now().Add(ttl)); err != nil {
-						log.Println("SetString", err)
-						return err
-					}
-				}
-
-				return nil
-			},
-		))
-
+		host.Init()
 		hosts = append(hosts, host)
 		s := router.Host(host.Hostname).Subrouter()
 
@@ -90,7 +52,6 @@ func RunServer(listenAddress string, hostConfigFiles []string) {
 	}
 
 	srv := &http.Server{
-
 		Addr: listenAddress,
 
 		// Good practice to set timeouts to avoid Slowloris attacks.  TODO Timeout config
