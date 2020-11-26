@@ -15,7 +15,7 @@ import (
 type Route struct {
 	Path string `hcl:",label"` // Respond to requests at this path
 
-	Source EndPoint `hcl:"render,block"` // URL to fetch the main source
+	Source Content `hcl:"content,block"` // URL to fetch the main source
 
 	MaxRate       float64 `hcl:"maxrate,optional"`
 	AllowBurst    int     `hcl:"burst,optional"`
@@ -103,7 +103,7 @@ func (route *Route) Handler(site *Host, w http.ResponseWriter, r *http.Request) 
 
 	// TODO Add Headers? Cookies? to fetchContext
 
-	content, err := route.Source.Content(site, fetchContext)
+	content, err := route.Source.Fetch(site, fetchContext)
 
 	if err != nil {
 		log.Printf("Error from endpoint '%s': %v", route.Path, err)

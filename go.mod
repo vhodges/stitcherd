@@ -19,7 +19,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1
-	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/valyala/fasttemplate v1.2.1
 	github.com/x-way/crawlerdetect v0.2.7
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4

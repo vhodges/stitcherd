@@ -20,12 +20,12 @@ import (
 // TODO The endpoint code needs to be re-done... getting crufty.
 type requestContextKey string
 
-// EndPoint itself is a RenderableContent
-type EndPoint struct {
+// Content is a piece of content representing a page or portion of a page
+type Content struct {
 	Source   string `hcl:"source,optional"` // URL to fetch the main source
 	Selector string `hcl:"select,optional"` // CSS Selector to extract content from - optional
 
-	Merges []Merge `hcl:"into,block"` // May be empty
+	Replacements []Replacement `hcl:"replacement,block"` // May be empty
 
 	CacheKey string `hcl:"cache,optional"`
 	CacheTTL string `hcl:"ttl,optional"`
@@ -39,22 +39,22 @@ type EndPoint struct {
 	//FetchData map[string]string `hcl:"rules"`
 }
 
-// Content returns the rendered content (or from endpoint if endpoint is configured for the end point)
-func (endpoint *EndPoint) Content(site *Host, contextdata map[string]interface{}) (string, error) {
+// Fetch returns the rendered content (or from endpoint if endpoint is configured for the end point)
+func (c *Content) Fetch(site *Host, contextdata map[string]interface{}) (string, error) {
 
 	//log.Printf("Content From: %+v\n", endpoint)
 
-	if endpoint.Caching() {
+	if c.Caching() {
 
 		var content string
 
-		var contextvalue = EndPointContextValue{Site: site, EndPoint: endpoint, ContextData: contextdata}
+		var contextvalue = ContentContextValue{Site: site, Content: c, ContextData: contextdata}
 		ctx, cancel := context.WithTimeout(context.WithValue(context.Background(), requestContextKey("request"), contextvalue),
 			time.Millisecond*500)
 
 		defer cancel()
 
-		if err := site.Cache.Get(ctx, endpoint.InterpolatedCacheKey(contextdata), groupcache.StringSink(&content)); err != nil {
+		if err := site.Cache.Get(ctx, c.InterpolatedCacheKey(contextdata), groupcache.StringSink(&content)); err != nil {
 			log.Printf("Error getting from cache: %v\n", err)
 			return "", err
 		}
@@ -62,16 +62,16 @@ func (endpoint *EndPoint) Content(site *Host, contextdata map[string]interface{}
 		return content, nil
 	}
 
-	return endpoint.Render(site, contextdata)
+	return c.Render(site, contextdata)
 }
 
 // Render loads content from SourceURI and merges an fragements
 // into the resulting document and returns the string representation
-func (endpoint *EndPoint) Render(site *Host, contextdata map[string]interface{}) (string, error) {
+func (c *Content) Render(site *Host, contextdata map[string]interface{}) (string, error) {
 
 	var renderedContent string
 
-	content, err2 := endpoint.Fetch(contextdata)
+	content, err2 := c.fetcher(contextdata).Fetch()
 
 	if err2 != nil {
 		log.Println(err2)
@@ -87,10 +87,10 @@ func (endpoint *EndPoint) Render(site *Host, contextdata map[string]interface{})
 
 	// Might be empty but otherwise, get and merge the content for each one
 	// TODO Add context handling and cancelation
-	for _, merge := range endpoint.Merges {
+	for _, merge := range c.Replacements {
 
 		// Retrieve fragement.Source content
-		fragment, _ := merge.Content.Content(site, contextdata)
+		fragment, _ := merge.Content.Fetch(site, contextdata)
 
 		// Find the insertion point in sourceFile at merge.InsertAt
 		insertSelection := doc.Find(merge.At) // Potentially costly, look into caching the source and insert selection points!?!
@@ -100,9 +100,9 @@ func (endpoint *EndPoint) Render(site *Host, contextdata map[string]interface{})
 	}
 
 	// By having the selector we can treat endpoints as a component
-	if endpoint.Selector != "" {
+	if c.Selector != "" {
 		// Get content at Selector
-		renderedContent, err = doc.Find(endpoint.Selector).Html()
+		renderedContent, err = doc.Find(c.Selector).Html()
 	} else {
 		renderedContent, err = doc.Html()
 	}
@@ -110,18 +110,13 @@ func (endpoint *EndPoint) Render(site *Host, contextdata map[string]interface{})
 	return renderedContent, err
 }
 
-// Fetch returns the content
-func (endpoint *EndPoint) Fetch(contextdata map[string]interface{}) (string, error) {
-	return endpoint.fetcher(contextdata).Fetch()
-}
-
 // Factory method to return a fetcher for the end point
-func (endpoint *EndPoint) fetcher(contextdata map[string]interface{}) DocumentFetcher {
+func (c *Content) fetcher(contextdata map[string]interface{}) DocumentFetcher {
 	var fetcher DocumentFetcher
 	fetcher = &StringFetcher{Body: ""} // Default to empty string
 
-	if endpoint.Source != "" {
-		t := fasttemplate.New(endpoint.Source, "{{", "}}")
+	if c.Source != "" {
+		t := fasttemplate.New(c.Source, "{{", "}}")
 		s := t.ExecuteString(contextdata)
 
 		u, err := url.Parse(s)
@@ -140,24 +135,24 @@ func (endpoint *EndPoint) fetcher(contextdata map[string]interface{}) DocumentFe
 		}
 	}
 
-	if endpoint.Template != "" {
+	if c.Template != "" {
 
 		if true /*endpoint.parsedTemplate == nil*/ {
-			templateBytes, _ := ioutil.ReadFile(endpoint.Template)
+			templateBytes, _ := ioutil.ReadFile(c.Template)
 			templateContents := string(templateBytes)
 
 			funcs := sprig.GenericFuncMap()
 			funcs["N"] = iter.N
 			funcs["unescape"] = unescape
 
-			endpoint.parsedTemplate = template.Must(template.New(endpoint.Template).Funcs(template.FuncMap(funcs)).Parse(templateContents))
+			c.parsedTemplate = template.Must(template.New(c.Template).Funcs(template.FuncMap(funcs)).Parse(templateContents))
 		}
 
 		// interpolate the path for the any JSON source
-		t := fasttemplate.New(endpoint.JSON, "{{", "}}")
+		t := fasttemplate.New(c.JSON, "{{", "}}")
 		json := t.ExecuteString(contextdata)
 
-		return &RenderedTemplateFetcher{Template: endpoint.parsedTemplate,
+		return &RenderedTemplateFetcher{Template: c.parsedTemplate,
 			DataURL:        json,
 			SourceFetcher:  fetcher,
 			RequestContext: contextdata,
@@ -172,21 +167,21 @@ func unescape(s string) template.HTML {
 	return template.HTML(s)
 }
 
-// EndPointContextValue is passed via Context.WithValue() to the endpoint Getter Func
-type EndPointContextValue struct {
+// ContentContextValue is passed via Context.WithValue() to the endpoint Getter Func
+type ContentContextValue struct {
 	Site        *Host
-	EndPoint    *EndPoint
+	Content     *Content
 	ContextData map[string]interface{}
 }
 
 // Caching returns true if we are to use the endpoint
-func (endpoint *EndPoint) Caching() bool {
-	return endpoint.CacheKey != ""
+func (c *Content) Caching() bool {
+	return c.CacheKey != ""
 }
 
 // InterpolatedCacheKey returns the interpolated endpoint key
-func (endpoint *EndPoint) InterpolatedCacheKey(contextData map[string]interface{}) string {
-	t := fasttemplate.New(endpoint.CacheKey, "{{", "}}")
+func (c *Content) InterpolatedCacheKey(contextData map[string]interface{}) string {
+	t := fasttemplate.New(c.CacheKey, "{{", "}}")
 	return t.ExecuteString(contextData)
 
 }

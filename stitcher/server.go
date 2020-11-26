@@ -10,8 +10,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// RouteHandler uses the Source to render content
-func RouteHandler(site *Host, route Route) func(http.ResponseWriter, *http.Request) {
+// ContentHandler uses the Source to render content
+func ContentHandler(site *Host, route Route) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		route.Handler(site, w, r)
 	}
@@ -41,7 +41,7 @@ func RunServer(listenAddress string, hostConfigFiles []string) {
 		for _, r := range host.Routes {
 			// TODO Static hosting should just be a route/handler
 			r.Init()
-			s.HandleFunc(r.Path, RouteHandler(host, r))
+			s.HandleFunc(r.Path, ContentHandler(host, r))
 		}
 
 		// If a document root was supplied, set up a default route for static content

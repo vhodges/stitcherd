@@ -33,18 +33,18 @@ func (host *Host) Init() {
 		func(ctx context.Context, id string, dest groupcache.Sink) error {
 			v := ctx.Value(requestContextKey("request"))
 
-			r, ok := v.(EndPointContextValue)
+			r, ok := v.(ContentContextValue)
 
 			if ok {
 
-				content, err := r.EndPoint.Render(r.Site, r.ContextData)
+				content, err := r.Content.Render(r.Site, r.ContextData)
 
 				if err != nil {
-					log.Printf("Error: %v - '%+v'\n", err, r.EndPoint)
+					log.Printf("Error: %v - '%+v'\n", err, r.Content)
 					return err
 				}
 
-				ttl, err := time.ParseDuration(r.EndPoint.CacheTTL)
+				ttl, err := time.ParseDuration(r.Content.CacheTTL)
 				if err != nil {
 					log.Printf("Error parsing TTL duration: '%v' for key '%s' defaulting to a TTL of one minute\n", err, id)
 					ttl = time.Minute * 1

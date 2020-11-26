@@ -3,10 +3,10 @@ documentroot = "demo/html"  # Optional, allow static content from this folder
 
 route "/users" {
 
-  render { 
+  content { 
     source = "demo/html/index.html"
-    into "#replaceme" {
-      render {
+    replacement "#replaceme" {
+      content {
         template = "demo/template/users.tmpl"
         json = "https://jsonplaceholder.typicode.com/users"
       }
@@ -23,11 +23,11 @@ route "/users" {
 }
 
 route "/users/{userid}" {
-  render {
+  content {
     source = "demo/html/index.html"
 
-    into "#replaceme" {
-      render {
+    replacement "#replaceme" {
+      content {
         template = "demo/template/user.tmpl"
         json = "https://jsonplaceholder.typicode.com/users/{{userid}}"
         cache = "JSON:/users/{{userid}}"
@@ -35,8 +35,8 @@ route "/users/{userid}" {
       }
     }
 
-    into "#todo_list" {
-      render {
+    replacement "#todo_list" {
+      content {
         template = "demo/template/todos.tmpl"
         json = "https://jsonplaceholder.typicode.com/todos?userId={{userid}}"
         cache = "JSON:/todos/{{userid}}"
@@ -51,11 +51,11 @@ route "/users/{userid}" {
 
 // An example of matching /folder/ (ie pretty urls) and inject content in all of them.
 route "/{folderPath:.*\\/$}" {
-  render  {
+  content  {
     source = "demo/html/{{folderPath}}index.html"
 
-    into "#replaceme" {
-      render {
+    replacement "#replaceme" {
+      content {
         source = "string:<div id='intome'>This is the replacement string (One)</div>"
       }
     }
@@ -64,10 +64,10 @@ route "/{folderPath:.*\\/$}" {
 
 // An example of injecting content into all file paths than end in html
 route "/{rest:.*html$}" {
-  render {
+  content {
     source = "demo/html/{{rest}}"
-    into "#replaceme" {
-      render {
+    replacement "#replaceme" {
+      content {
         source = "string:<div id='intome'>This is the other replacement string (Two)</div>"
       }
     }
@@ -76,13 +76,16 @@ route "/{rest:.*html$}" {
 
 // The root of the site
 route "/" {
-  render  {
+  content  {
     source = "demo/html/index.html"
-    into "#replaceme" {
-      render {
+    replacement "#replaceme" {
+      content {
         source = "string:<div id='intome'>This is the other replacement string (Three)</div>"
       }
     }
   }
 }
 
+route "/foo" {
+  
+}
