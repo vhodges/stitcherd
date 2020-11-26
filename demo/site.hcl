@@ -1,5 +1,4 @@
 hostname = "localhost" 
-documentroot = "demo/html"  # Optional, allow static content from this folder
 
 route "/users" {
 
@@ -75,6 +74,7 @@ route "/{rest:.*html$}" {
 }
 
 // The root of the site
+/*
 route "/" {
   content  {
     source = "demo/html/index.html"
@@ -85,7 +85,16 @@ route "/" {
     }
   }
 }
+*/
 
 route "/foo" {
-  
+  static {
+    directory = "demo/foo"
+  }
+}
+
+route "/" {
+  static {
+    directory = "demo/html"
+  }
 }

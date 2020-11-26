@@ -1,5 +1,4 @@
 hostname = "stitcherd.vhodges.dev" 
-documentroot = "website/public"
 
 route "/news/" {
   content {
@@ -54,3 +53,10 @@ route "/" {
     ttl = "10m"
   } 
 }
+
+route "/" {
+  static {
+    directory = "website/public"
+  }
+}
+

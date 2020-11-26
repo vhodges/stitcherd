@@ -15,7 +15,8 @@ import (
 type Route struct {
 	Path string `hcl:",label"` // Respond to requests at this path
 
-	Source *Content `hcl:"content,block"` // URL to fetch the main source
+	Source     *Content `hcl:"content,block"` // URL to fetch the main source
+	StaticPath *Static  `hcl:"static,block"`  // URL to fetch the main source
 
 	MaxRate       float64 `hcl:"maxrate,optional"`
 	AllowBurst    int     `hcl:"burst,optional"`

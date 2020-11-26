@@ -10,8 +10,7 @@ import (
 
 // Host represents a single VHOSTed site
 type Host struct {
-	Hostname     string `hcl:"hostname"`
-	DocumentRoot string `hcl:"documentroot,optional"`
+	Hostname string `hcl:"hostname"`
 
 	Routes []Route `hcl:"route,block"`
 

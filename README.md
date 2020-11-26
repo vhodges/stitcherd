@@ -16,15 +16,16 @@ Stitcherd is for those times.
   * Go templates (with HTML and JSON Data retrieval) for endpoints
   * Bot detection (>800 known bots)
   * Both General and (Bot == true) rate limiting (per route)
+  * Static content routes
   
 ### Coming Soon
 
   * (Optional) Sessions 
-  * Proxy for fallback (eg / to some CMS) and for routes (eg /blog/ proxied to Wordpress)
-  * Static content routes
   * Site Authentication (OAUTH/SAML end point config, basic auth?  Builtin user/password (agencies?)). Authenticate routes?
   * HMAC auth support for backend ends
   * More control over endpoint request (ACTION/Verb, protocol, headers, cookies, form vars, etc )
+  * Proxy for fallback (eg / to some CMS) and for routes (eg /blog/ proxied to Wordpress)
+
 
 # Building
 
