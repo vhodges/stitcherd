@@ -5,8 +5,8 @@ route "/users" {
 
   render { 
     source = "demo/html/index.html"
-    replace "#replaceme" {
-      with {
+    into "#replaceme" {
+      render {
         template = "demo/template/users.tmpl"
         json = "https://jsonplaceholder.typicode.com/users"
       }
@@ -26,8 +26,8 @@ route "/users/{userid}" {
   render {
     source = "demo/html/index.html"
 
-    replace "#replaceme" {
-      with {
+    into "#replaceme" {
+      render {
         template = "demo/template/user.tmpl"
         json = "https://jsonplaceholder.typicode.com/users/{{userid}}"
         cache = "JSON:/users/{{userid}}"
@@ -35,8 +35,8 @@ route "/users/{userid}" {
       }
     }
 
-    replace "#todo_list" {
-      with {
+    into "#todo_list" {
+      render {
         template = "demo/template/todos.tmpl"
         json = "https://jsonplaceholder.typicode.com/todos?userId={{userid}}"
         cache = "JSON:/todos/{{userid}}"
@@ -54,9 +54,9 @@ route "/{folderPath:.*\\/$}" {
   render  {
     source = "demo/html/{{folderPath}}index.html"
 
-    replace "#replaceme" {
-      with {
-        source = "string:<div id='replaceme'>This is the replacement string (One)</div>"
+    into "#replaceme" {
+      render {
+        source = "string:<div id='intome'>This is the replacement string (One)</div>"
       }
     }
   }
@@ -66,9 +66,9 @@ route "/{folderPath:.*\\/$}" {
 route "/{rest:.*html$}" {
   render {
     source = "demo/html/{{rest}}"
-    replace "#replaceme" {
-      with {
-        source = "string:<div id='replaceme'>This is the other replacement string (Two)</div>"
+    into "#replaceme" {
+      render {
+        source = "string:<div id='intome'>This is the other replacement string (Two)</div>"
       }
     }
   }
@@ -78,9 +78,9 @@ route "/{rest:.*html$}" {
 route "/" {
   render  {
     source = "demo/html/index.html"
-    replace "#replaceme" {
-      with {
-        source = "string:<div id='replaceme'>This is the other replacement string (Three)</div>"
+    into "#replaceme" {
+      render {
+        source = "string:<div id='intome'>This is the other replacement string (Three)</div>"
       }
     }
   }

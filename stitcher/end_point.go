@@ -25,7 +25,7 @@ type EndPoint struct {
 	Source   string `hcl:"source,optional"` // URL to fetch the main source
 	Selector string `hcl:"select,optional"` // CSS Selector to extract content from - optional
 
-	Merges []Merge `hcl:"replace,block"` // May be empty
+	Merges []Merge `hcl:"into,block"` // May be empty
 
 	CacheKey string `hcl:"cache,optional"`
 	CacheTTL string `hcl:"ttl,optional"`
