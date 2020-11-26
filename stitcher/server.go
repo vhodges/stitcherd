@@ -11,9 +11,16 @@ import (
 	"github.com/mailgun/groupcache/v2"
 )
 
+// RouteHandler uses the Source to render content
+func RouteHandler(site *Host, route Route) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		route.Handler(site, w, r)
+	}
+}
+
 // RunServer serves up sites specified in hosts
 func RunServer(listenAddress string, hostConfigFiles []string) {
-	r := mux.NewRouter()
+	router := mux.NewRouter()
 	var hosts []*Host
 
 	cacheService := InitCache()
@@ -66,13 +73,13 @@ func RunServer(listenAddress string, hostConfigFiles []string) {
 		))
 
 		hosts = append(hosts, host)
-		s := r.Host(host.Hostname).Subrouter()
+		s := router.Host(host.Hostname).Subrouter()
 
 		// TODO Allow more flexible route definition/handling (ie Method, Protocol, etc)
-		for _, endPoint := range host.Routes {
+		for _, r := range host.Routes {
 			// TODO Static hosting should just be a route/handler
-			endPoint.Init()
-			s.HandleFunc(endPoint.Route, EndPointHandler(host, endPoint))
+			r.Init()
+			s.HandleFunc(r.Path, RouteHandler(host, r))
 		}
 
 		// If a document root was supplied, set up a default route for static content
@@ -92,7 +99,7 @@ func RunServer(listenAddress string, hostConfigFiles []string) {
 		IdleTimeout:  time.Second * 60,
 
 		//		Handler: handlers.CombinedLoggingHandler(os.Stderr, handlers.RecoveryHandler()(r)), // Pass our instance of gorilla/mux in.
-		Handler: handlers.RecoveryHandler()(r), // Pass our instance of gorilla/mux in.
+		Handler: handlers.RecoveryHandler()(router), // Pass our instance of gorilla/mux in.
 	}
 
 	// Run our server in a goroutine so that it doesn't block.

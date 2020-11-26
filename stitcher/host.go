@@ -7,7 +7,7 @@ type Host struct {
 	Hostname     string `hcl:"hostname"`
 	DocumentRoot string `hcl:"documentroot,optional"`
 
-	Routes []EndPoint `hcl:"route,block"`
+	Routes []Route `hcl:"route,block"`
 
 	Cache    *groupcache.Group
 	MaxCache int64 `hcl:"max_cache,optional"`
