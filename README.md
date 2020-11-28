@@ -5,6 +5,18 @@ pretty much anywhere and any how you would like to.  But sometimes,  just someti
 some page or some part of every page that has dynamic or even personalized content on it. 
 Stitcherd is for those times.
 
+It is a web server that reads some source content (typically a local static file, but could come from a remote source), fetches one or more pieces of remote “dynamic” content and injects them into the source document using a css selector to find the insertion point. These can be nested. The remote dynamic content can be remote html or output of a Go template that can also process remote html and/or remote json data.
+
+The resulting content is then served to the client. You can have multiple routes with different sets of content to be replaced (and indeed source document). In other words it does server side includes, but with css/dom manipulation and so doesn’t require special directives in the source documents.
+
+A couple of Use cases:
+
+* Fast e-commerce site with static product pages, but dynamic pricing/availability/promotions. Plus server side carts
+* Commenting system for static blogs. JS Free
+* Micro services/frontends
+
+Yes, it’s server that has to be hosted somewhere and you need to decide if that’s okay for your use case or not, but then so are most of the alternatives, except JS of course, but same-origin, et al leads it to be harder (imo) to use than this.
+
 ## Features
 
 ### Current
