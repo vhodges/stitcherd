@@ -66,9 +66,8 @@
     <h1 class="heading-text" style="font-size: 40px;border:none;">
         Dynamic content for <em>mostly</em> static sites
     </h1>
-    <h3 class="title-text" style="border:none;">
-        Use CSS selectors to find and replace elements on pages with content
-        from other sources.
+    <h3 class="title-text" style="text-align:left;font-size:18px;border:none;">
+        Stitcherd can automatically modify the element tree of a page before serving it to users. You can tell it where to insert new content using CSS selectors. <br><br>For example, if you want to be evil, inject a huge animated banner just before the &lt;main&gt; element of every page you serve.
     </h3>
     <div>
         <a class="github-button" href="https://github.com/vhodges/stitcherd" data-size="large" data-show-count="true"
@@ -112,6 +111,15 @@
 pretty much anywhere and any how you would like to.  But sometimes,  just sometimes there is
 some page or some part of every page that has dynamic or even personalized content on it. 
 Stitcherd is for those times.</p>
+<p>It is a web server that reads some source content (typically a local static file, but could come from a remote source), fetches one or more pieces of remote “dynamic” content and injects them into the source document using a css selector to find the insertion point. These can be nested. The remote dynamic content can be remote html or output of a Go template that can also process remote html and/or remote json data.</p>
+<p>The resulting content is then served to the client. You can have multiple routes with different sets of content to be replaced (and indeed source document). In other words it does server side includes, but with css/dom manipulation and so doesn’t require special directives in the source documents.</p>
+<p>A couple of Use cases:</p>
+<ul>
+<li>Fast e-commerce site with static product pages, but dynamic pricing/availability/promotions. Plus server side carts</li>
+<li>Commenting system for static blogs. JS Free</li>
+<li>Micro services/frontends</li>
+</ul>
+<p>Yes, it’s server that has to be hosted somewhere and you need to decide if that’s okay for your use case or not, but then so are most of the alternatives, except JS of course, but same-origin, et al leads it to be harder (imo) to use than this. </p>
 <h2 id="features">Features</h2>
 <h3 id="current">Current</h3>
 <ul>
