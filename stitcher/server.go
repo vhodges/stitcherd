@@ -2,6 +2,7 @@ package stitcher
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -10,57 +11,74 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// ContentHandler uses the Source to render content
-func ContentHandler(site *Host, route Route) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		route.ContentHandler(site, w, r)
+type Stitcherd struct {
+
+	ListenAddress    string
+	WorkingDirectory string
+	AdminHostName    string
+  AdminEnabled     bool
+
+	hosts            map[string]*Host
+	adminRouter      *mux.Router
+}
+
+// Performs initialization
+func (stitcherd *Stitcherd) Init() *Stitcherd {
+
+	stitcherd.hosts = make(map[string]*Host)
+
+	if stitcherd.AdminEnabled {
+		stitcherd.adminRouter = mux.NewRouter().Host(stitcherd.AdminHostName).Subrouter()
+		stitcherd.adminRouter.HandleFunc("/hosts/load/{filename:.*}", stitcherd.AdminHandler())
+	}
+
+	return stitcherd
+}
+
+func (stitcherd *Stitcherd) ServeHTTP(w http.ResponseWriter, request *http.Request) {
+
+	log.Printf("Request for Host: '%s'", request.Host)
+
+	host := stitcherd.hosts[request.Host]
+
+	if host != nil {
+		host.Router.ServeHTTP(w, request)
+	} else if stitcherd.adminRouter != nil {
+		stitcherd.adminRouter.ServeHTTP(w, request)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+    w.Write([]byte("404 - Not found\n"))
 	}
 }
 
-// RunServer serves up sites specified in hosts
-func RunServer(listenAddress string, hostConfigFiles []string) {
-	router := mux.NewRouter()
-	var hosts []*Host
+// RunStictcherd serves up sites specified in hosts
+func (stitcherd *Stitcherd) Run(hostConfigFiles []string) {
+	log.Printf("Start - admin hostname: '%s', working directory: '%s'\n", 
+		stitcherd.AdminHostName, stitcherd.WorkingDirectory)
+
+	for _, file := range hostConfigFiles {
+		host, err := NewHostFromFile(file) 
+		if err == nil {
+			stitcherd.SetHost(host)
+		}
+	}
 
 	cacheService := InitCache()
 	defer cacheService.Shutdown(context.Background())
 
-	for _, hostConfigFile := range hostConfigFiles {
-		host, err := ReadHostHCL(hostConfigFile)
-
-		if err != nil {
-			log.Printf("Error reading config file '%s': %v", hostConfigFile, err)
-			continue
-		}
-
-		host.Init()
-		hosts = append(hosts, host)
-		s := router.Host(host.Hostname).Subrouter()
-
-		// TODO Allow more flexible route definition/handling (ie Method, Protocol, etc)
-		for _, r := range host.Routes {
-			if r.Source != nil {
-				r.Init()
-				s.HandleFunc(r.Path, ContentHandler(host, r))
-			} else if r.StaticPath != nil {
-				s.PathPrefix(r.Path).Handler(http.StripPrefix(r.Path, http.FileServer(http.Dir(r.StaticPath.Directory))))
-			}
-		}
-	}
-
 	srv := &http.Server{
-		Addr: listenAddress,
+		Addr: stitcherd.ListenAddress,
 
 		// Good practice to set timeouts to avoid Slowloris attacks.  TODO Timeout config
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
 
-		//		Handler: handlers.CombinedLoggingHandler(os.Stderr, handlers.RecoveryHandler()(r)), // Pass our instance of gorilla/mux in.
-		Handler: handlers.RecoveryHandler()(router), // Pass our instance of gorilla/mux in.
+		//		Stictcherd: Stictcherds.CombinedLoggingStictcherd(os.Stderr, Stictcherds.RecoveryStictcherd()(r)), // Pass our instance of gorilla/mux in.
+		Handler: handlers.RecoveryHandler()(stitcherd),
 	}
 
-	// Run our server in a goroutine so that it doesn't block.
+	// Run our Stictcherd in a goroutine so that it doesn't block.
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
 			log.Println(err)
@@ -69,3 +87,33 @@ func RunServer(listenAddress string, hostConfigFiles []string) {
 
 	WaitForSignal(srv)
 }
+
+// Add or replace a host for the Stictcherd
+func (stitcherd *Stitcherd) SetHost(host *Host) {
+	stitcherd.hosts[host.Hostname] = host
+}
+
+// Returns an AdminHandler func
+func (stitcherd *Stitcherd) AdminHandler() func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+
+		filename := vars["filename"]
+
+		log.Printf("AdminHandler: New Host File?: '%s'\n", filename)
+
+		host, err := NewHostFromFile(filename) 
+
+		if err == nil {
+			stitcherd.SetHost(host)
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, "Filename: %v OK\n", vars["filename"])
+			log.Printf("AdminHandler: (re)Loaded %s\n", filename)
+  	} else {
+			log.Printf("AdminHandler: Error Loading %s, %v\n", filename, err)
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "filename: %v ERROR '%v'\n", vars["filename"], err)
+		}
+	}
+}
+

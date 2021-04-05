@@ -1,4 +1,4 @@
-hostname = "localhost" 
+hostname = "localhost:3000" 
 
 route "/users" {
 
@@ -55,7 +55,7 @@ route "/{folderPath:.*\\/$}" {
 
     replacement "#replaceme" {
       content {
-        source = "string:<div id='intome'>This is the replacement string (One)</div>"
+        source = "string:<div id='intome'>This is the replacement string (One - New Again)</div>"
       }
     }
   }
@@ -67,7 +67,7 @@ route "/{rest:.*html$}" {
     source = "demo/html/{{rest}}"
     replacement "#replaceme" {
       content {
-        source = "string:<div id='intome'>This is the other replacement string (Two)</div>"
+        source = "string:<div id='intome'>This is the other replacement string (Two - New Again)</div>"
       }
     }
   }

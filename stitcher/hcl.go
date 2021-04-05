@@ -3,6 +3,8 @@ package stitcher
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
+	"unicode/utf8"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
@@ -29,8 +31,42 @@ func ParseHostHCL(src []byte, filename string) (c *Host, err error) {
 	return c, nil
 }
 
+// From fs.  Will go away once updated to Go 1.16.x
+func ValidPath(name string) bool {
+	if !utf8.ValidString(name) {
+		return false
+	}
+
+	if name == "." {
+		// special case
+		return true
+	}
+
+	// Iterate over elements in name, checking each.
+	for {
+		i := 0
+		for i < len(name) && name[i] != '/' {
+			i++
+		}
+		elem := name[:i]
+		if elem == "" || elem == "." || elem == ".." {
+			return false
+		}
+		if i == len(name) {
+			return true // reached clean ending
+		}
+		name = name[i+1:]
+	}
+}
+
 // ReadHostHCL will load and parse a file containing hcl that defines a host
 func ReadHostHCL(filename string) (c *Host, err error) {
+
+	if !ValidPath(filename) {
+		log.Printf("Invalid filename '%s'\n", filename)
+		return nil, fmt.Errorf("Invalid filename '%s'", filename)
+	}
+	
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
