@@ -7,6 +7,15 @@ import (
 	"github.com/mailgun/groupcache/v2"
 )
 
+// RenderContext is passed via Context.WithValue() to the endpoint Getter Func
+type FragmentRenderContext struct {
+	Site        *Host
+	Fragment    *Fragment
+	ContextData map[string]interface{}
+}
+
+type requestContextKey string
+
 // InitCache sets up the cache service
 func InitCache() *http.Server {
 

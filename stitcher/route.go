@@ -13,25 +13,38 @@ import (
 
 // Route returns content for a given path
 type Route struct {
-	Path string `hcl:",label"` // Respond to requests at this path
+	Path string // Respond to requests at this path
 
-	Source     *Content `hcl:"content,block"` // URL to fetch the main source
-	StaticPath *Static  `hcl:"static,block"`  // URL to fetch the main source
+	RespondWith string 
 
-	MaxRate       float64 `hcl:"maxrate,optional"`
-	AllowBurst    int     `hcl:"burst,optional"`
-	BotMaxRate    float64 `hcl:"botmaxrate,optional"`
-	BotAllowBurst int     `hcl:"botburst,optional"`
+	// RespondWith "fragemented_page' renders this
+	Page     *FragmentedPage
+	
+	// ResponeWith 'static_files' servers this local directory to server
+	StaticPath string   
+	
+	// TODO 
+	// RedirectTo string  // TODO interpolate
+	// RedirectStatus // Eg 302 (Found) or 302 (Moved permanently)
+
+	// ResponseString string // TODO Interpolate
+	// ResponseCode   string
+
+	// ProxyHost string
+	// ProxyString??? string
+
+	// Rate limiter
+	MaxRate       float64
+	AllowBurst    int
+	BotMaxRate    float64
+	BotAllowBurst int
 
 	normalLimiter *rate.Limiter // Really only makes sense/applies to Route
 	botLimiter    *rate.Limiter
-
-	//Options hcl.Body `hcl:",remain"`
-	//FetchData map[string]string `hcl:"rules"`
 }
 
 // Init creates runtime objects for the end point
-func (route *Route) Init() {
+func (route *Route) Init(host *Host) {
 
 	if route.MaxRate > 0 && route.AllowBurst > 0 {
 		route.normalLimiter = rate.NewLimiter(rate.Limit(route.MaxRate),
@@ -48,6 +61,17 @@ func (route *Route) Init() {
 		log.Printf("Added bot limiter for '%s' Rate: %f Burst: %d\n",
 			route.Path, rate.Limit(route.BotMaxRate), route.BotAllowBurst)
 	}
+
+	// Add the handler for the route
+	switch route.RespondWith {
+	case "fragmented_page":
+		host.Router.HandleFunc(route.Path, FragmentedPageHandler(host, *route))
+	case "static_content":
+		host.Router.PathPrefix(route.Path).Handler(http.StripPrefix(route.Path, http.FileServer(http.Dir(route.StaticPath))))
+	case "redirect":
+	case "proxy":
+	}
+
 }
 
 // Throttling returns true if the current request is to be rate limited.
@@ -71,9 +95,9 @@ func (route *Route) nextRequestID() string {
 	return fmt.Sprintf("%d", time.Now().UnixNano())
 }
 
-// ContentHandler uses the Source to render content
-func (route *Route) ContentHandler(site *Host, w http.ResponseWriter, r *http.Request) {
-
+// FragmentedPageHandler Renders the route.Page
+func (route *Route) FragmentedPageHandler(site *Host, w http.ResponseWriter, r *http.Request) {
+	var err error
 	start := time.Now()
 
 	var fetchContext map[string]interface{} = make(map[string]interface{})
@@ -104,7 +128,7 @@ func (route *Route) ContentHandler(site *Host, w http.ResponseWriter, r *http.Re
 
 	// TODO Add Headers? Cookies? to fetchContext
 
-	content, err := route.Source.Fetch(site, fetchContext)
+	content := route.Page.Render(site, fetchContext)
 
 	if err != nil {
 		log.Printf("Error from endpoint '%s': %v", route.Path, err)
@@ -115,4 +139,11 @@ func (route *Route) ContentHandler(site *Host, w http.ResponseWriter, r *http.Re
 
 	elapsed := time.Since(start)
 	log.Println(fetchContext["_requestId"], r.Method, r.URL.Path, r.Proto, elapsed)
+}
+
+// FragmentedPageHandler uses the Source to render content
+func FragmentedPageHandler(site *Host, route Route) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		route.FragmentedPageHandler(site, w, r)
+	}
 }

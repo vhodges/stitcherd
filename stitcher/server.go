@@ -15,8 +15,9 @@ type Stitcherd struct {
 
 	ListenAddress    string
 	WorkingDirectory string
+
 	AdminHostName    string
-  AdminEnabled     bool
+    AdminEnabled     bool
 
 	hosts            map[string]*Host
 	adminRouter      *mux.Router
@@ -47,7 +48,7 @@ func (stitcherd *Stitcherd) ServeHTTP(w http.ResponseWriter, request *http.Reque
 		stitcherd.adminRouter.ServeHTTP(w, request)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
-    w.Write([]byte("404 - Not found\n"))
+        w.Write([]byte("404 - Not found\n"))
 	}
 }
 

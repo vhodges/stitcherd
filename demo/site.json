@@ -1,0 +1,149 @@
+{
+	"Hostname": "localhost:3000",
+    "Routes": [
+        {
+            "Path": "/users",
+            "RespondWith": "fragmented_page",
+        
+            "MaxRate": 10.0,
+            "Burst": 50,
+            "BotMaxRate": 2.0,
+            "BotBurst": 5,
+
+            "Page": {
+                "Fragment": { 
+                    "CacheKey": "/users",
+                    "CacheTTL": "30s",
+
+                    "Fetcher": {
+                        "Type": "file",
+                        "Source": "demo/html/index.html"
+                    },
+                    "Fragments": [
+                        {
+                            "Fetcher": {
+                                "Type": "uri",
+                                "Source": "https://jsonplaceholder.typicode.com/users",
+                                "IsJson": true,
+                                "Template": "demo/template/users.tmpl"
+                            },
+                            "DocumentTransforms": [
+                                {
+                                    "Type": "replace",
+                                    "ParentSelector": "#replaceme"                    
+                                }
+                            ]        
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Path": "/users/{userid}",
+            "RespondWith": "fragmented_page",
+        
+            "Page": {
+                "Fragment": { 
+                    "CacheKey": "/users/{{userid}}",
+                    "CacheTTL": "10s",
+
+                    "Fetcher": {
+                        "Type": "file",
+                        "Source": "demo/html/index.html"
+                    },
+                    "Fragments": [
+                        {
+                            "CacheKey": "JSON:/users/{{userid}}",
+                            "CacheTTL": "5m",
+                            "Fetcher": {
+                                "Type": "uri",
+                                "Source": "https://jsonplaceholder.typicode.com/users/{{userid}}",
+                                "IsJson": true,
+                                "Template": "demo/template/user.tmpl"
+                            },
+                            "DocumentTransforms": [
+                                {
+                                    "Type": "replace",
+                                    "ParentSelector": "#replaceme"                    
+                                }
+                            ]        
+                        },
+                        {
+                            "CacheKey": "JSON:/todos/{{userid}}",
+                            "CacheTTL": "1m",
+                            "Fetcher": {
+                                "Type": "uri",
+                                "Source": "https://jsonplaceholder.typicode.com/todos?userId={{userid}}",
+                                "IsJson": true,
+                                "Template": "demo/template/todos.tmpl"
+                            },
+                            "DocumentTransforms": [
+                                {
+                                    "Type": "replace",
+                                    "ParentSelector": "#todo_list"                    
+                                }
+                            ]        
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Path": "/{folderPath:.*\\/$}",
+            "RespondWith": "fragmented_page",
+        
+            "Page": {
+                "Fragment": {
+                    "Fetcher":{
+                        "Type": "file",
+                        "Source": "demo/html/{{folderPath}}index.html"
+                    },
+                    "Fragments":[
+                        {
+                            "Fetcher":{
+                                "Source": "<div id='intome'>This is the other replacement string (one)</div>"
+                            },
+                            "DocumentTransforms": [
+                                {
+                                    "Type": "replace",
+                                    "ParentSelector": "#replaceme"                    
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Path": "/{rest:.*html$}",
+            "RespondWith": "fragmented_page",
+        
+            "Page": {
+                "Fragment": {
+                    "Fetcher":{
+                        "Type": "file",
+                        "Source": "demo/html/{{rest}}"
+                    },
+                    "Fragments":[
+                        {
+                            "Fetcher":{
+                                "Source": "<div id='intome'>This is another replacement string (two)</div>"
+                            },
+                            "DocumentTransforms": [
+                                {
+                                    "Type": "replace",
+                                    "ParentSelector": "#replaceme"                    
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Path": "/",
+            "RespondWith": "static_content",
+            "StaticPath": "demo/html"
+        }
+    ]
+}
