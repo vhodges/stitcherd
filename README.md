@@ -56,7 +56,7 @@ Docker image at some point
 There is a 'demo' folder that serves as an example/testbed
 
 ```
-./stitcherd --host demo/site.hcl
+./stitcherd --host demo/site.json
 http://localhost:3000/
 ```
 
