@@ -2,6 +2,7 @@ package stitcher
 
 import (
 	"context"
+	"encoding/json"
 
 	"log"
 	"strings"
@@ -93,6 +94,19 @@ func (fragment *Fragment) Render(site *Host, contextdata map[string]interface{})
 	return html
 }
 
+func (fragment *Fragment) GetData(contextdata map[string]interface{}) map[string]interface{} {
+	var jsonData map[string]interface{}
+		
+	fetched_fragment, err := fragment.Fetcher.Fetch(contextdata)
+
+	if err != nil {
+		return nil // TODO Handle error better.
+	}
+
+	json.Unmarshal([]byte(fetched_fragment), &jsonData)
+
+	return jsonData
+}
 
 func (fragment *Fragment) FromCache(site *Host, contextdata map[string]interface{}) (string, error) {
 

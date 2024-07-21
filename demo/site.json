@@ -10,6 +10,16 @@
             "BotMaxRate": 2.0,
             "BotBurst": 5,
 
+            "RouteDataFragment": {
+                "CacheKey": "/users-data-fragement/{{host}}",
+                "CacheTTL": "30s",
+
+                "Fetcher": {
+                    "Type": "file",
+                    "Source": "demo/data-fragments/{{host}}.json"
+                },
+                "Fragments": []
+            },
             "Page": {
                 "Fragment": { 
                     "CacheKey": "/users",

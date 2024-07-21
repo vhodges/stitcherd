@@ -3,7 +3,9 @@ package stitcher
 import (
 	"fmt"
 	"log"
+	"os"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -14,6 +16,8 @@ import (
 // Route returns content for a given path
 type Route struct {
 	Path string // Respond to requests at this path
+
+	RouteDataFragment *Fragment
 
 	RespondWith string 
 
@@ -98,6 +102,7 @@ func (route *Route) nextRequestID() string {
 // FragmentedPageHandler Renders the route.Page
 func (route *Route) FragmentedPageHandler(site *Host, w http.ResponseWriter, r *http.Request) {
 	var err error
+
 	start := time.Now()
 
 	var fetchContext map[string]interface{} = make(map[string]interface{})
@@ -110,13 +115,22 @@ func (route *Route) FragmentedPageHandler(site *Host, w http.ResponseWriter, r *
 	// TODO Better request tracing... (context.Context too?)
 	fetchContext["_requestId"] = route.nextRequestID()
 
+	// Any params passed in, make available to the request.
 	for key, element := range mux.Vars(r) {
 		fetchContext[key] = element
 	}
 
+	// Same for any env vars
+	for _, e := range os.Environ() {
+        pair := strings.SplitN(e, "=", 2)
+		fetchContext[pair[0]] = pair[1]
+    }
+
 	// TODO these probably need to be escaped
 	fetchContext["requestPath"] = r.URL.Path
 	fetchContext["queryString"] = r.URL.RawQuery
+
+	fetchContext["host"] = r.Host
 
 	for key, element := range r.URL.Query() {
 		if len(element) == 0 {
@@ -125,6 +139,19 @@ func (route *Route) FragmentedPageHandler(site *Host, w http.ResponseWriter, r *
 			fetchContext[key] = element[0]
 		}
 	}
+
+	if route.RouteDataFragment != nil {
+		log.Printf("RouteDataFragment was not nil\n")
+
+		// Fetch a data blob Fragement to use to augment fetchContext
+		routeData := route.RouteDataFragment.GetData(fetchContext)
+
+		// Add the key,value pairs to fetchContext
+		for k,v := range routeData {
+			fetchContext[k] = v
+		}
+	} 
+
 
 	// TODO Add Headers? Cookies? to fetchContext
 
@@ -138,7 +165,7 @@ func (route *Route) FragmentedPageHandler(site *Host, w http.ResponseWriter, r *
 	}
 
 	elapsed := time.Since(start)
-	log.Println(fetchContext["_requestId"], r.Method, r.URL.Path, r.Proto, elapsed)
+	log.Println(fetchContext["_requestId"], r.Host, r.Method, r.URL.Path, r.Proto, elapsed)
 }
 
 // FragmentedPageHandler uses the Source to render content
