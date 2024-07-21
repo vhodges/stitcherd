@@ -1,6 +1,8 @@
 package stitcher
 
 import (
+	"regexp"
+	
 	"github.com/gorilla/mux"
 
 	"github.com/mailgun/groupcache/v2"
@@ -16,10 +18,15 @@ type Host struct {
 	MaxCache int64
 
 	Router *mux.Router
+
+	hostPattern *regexp.Regexp
 }
 
 // Init handles host specific initialization
 func (host *Host) Init() {
+
+	// Treat HostName as a regular expression 
+	host.hostPattern = regexp.MustCompile(host.Hostname)
 
 	maxCache := host.MaxCache
 	if maxCache == 0 {
@@ -42,4 +49,7 @@ func (host *Host) Init() {
 	}	
 }
 
+func (host *Host) Match(hostname string) bool {
+	return host.hostPattern.MatchString(hostname)
+}
 

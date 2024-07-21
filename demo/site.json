@@ -1,5 +1,5 @@
 {
-	"Hostname": "localhost:3000",
+	"Hostname": ".*",
     "Routes": [
         {
             "Path": "/users",

@@ -38,15 +38,26 @@ func (stitcherd *Stitcherd) Init() *Stitcherd {
 
 func (stitcherd *Stitcherd) ServeHTTP(w http.ResponseWriter, request *http.Request) {
 
-	log.Printf("Request for Host: '%s'", request.Host)
+	var host *Host = nil
 
-	host := stitcherd.hosts[request.Host]
+	log.Printf("Request for Host: '%s'\n", request.Host)
+
+	// Find a valid host matching request.host
+	for _, h := range stitcherd.hosts {
+		if h.Match(request.Host) {
+			host = h 
+			break
+		}
+	}
 
 	if host != nil {
+		log.Printf("Processing...\n")
 		host.Router.ServeHTTP(w, request)
+		log.Printf("Done\n")
 	} else if stitcherd.adminRouter != nil {
 		stitcherd.adminRouter.ServeHTTP(w, request)
 	} else {
+		log.Printf("No handler, 404\n")
 		w.WriteHeader(http.StatusNotFound)
         w.Write([]byte("404 - Not found\n"))
 	}
