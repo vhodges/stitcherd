@@ -60,12 +60,6 @@ There is a 'demo' folder that serves as an example/testbed
 http://localhost:3000/
 ```
 
-The home page at https://stitcherd.vhodges.dev/ also serves as an example.
-
-* It pulls the index page content from the Github README.md (ie this file)
-* It pulls a list of recent posts to the Announcment mailing list from sourcehut
-* Source (and generated static site - via zola - are checked into source control under website)
-
 # Prior Art and Inspiration
 
 * Edge side includes (ESI) using Varnish https://varnish-cache.org/
